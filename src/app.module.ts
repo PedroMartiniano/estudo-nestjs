@@ -1,0 +1,12 @@
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { UserModule } from './user/user.module';
+
+// decorator responsavel por passar os argumentos/parametros para a classe AppModule
+@Module({
+  imports: [UserModule],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
