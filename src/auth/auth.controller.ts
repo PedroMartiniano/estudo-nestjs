@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Res, Headers, UseGuards, Req } from "@nestjs/common";
+import { Body, Controller, Post, Get, Res, Headers, UseGuards, Req, BadRequestException } from "@nestjs/common";
 import { AuthLoginDTO } from "./dto/auth-login.dto";
 import { AuthRegisterDTO } from "./dto/auth-register.dto";
 import { AuthForgetDTO } from "./dto/auth-forget.dto";
@@ -27,6 +27,10 @@ export class AuthController {
     async register(@Body() body: AuthRegisterDTO, @Res() res: Response) {
         const token = await this.authService.register(body)
 
+        if (token instanceof BadRequestException) {
+            return res.status(400).json(token.getResponse())
+        }
+
         return res.status(201).json({ token })
     }
 
@@ -42,7 +46,7 @@ export class AuthController {
 
     @UseGuards(AuthGuard)
     @Get('me')
-    async me(@User('emaila') email) {
-        return { email: email }
+    async me(@User() user) {
+        return { user }
     }
 }

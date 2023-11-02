@@ -4,6 +4,7 @@ import { User } from "@prisma/client";
 import { PrismaService } from "src/prisma/prisma.service";
 import { AuthRegisterDTO } from "./dto/auth-register.dto";
 import { UserService } from "src/user/user.service";
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class AuthService {
@@ -95,10 +96,20 @@ export class AuthService {
     }
 
     async register(data: AuthRegisterDTO) {
-        const user = await this.userService.create(data)
+        try {
+            const user = await this.userService.create(data)
 
-        const token = this.createToken(user)
+            if (user instanceof BadRequestException) {
+                throw new BadRequestException('Erro ao cadastrar usuário.')
+            }
 
-        return token
+            const token = this.createToken(user)
+
+            return token
+        } catch (e) {
+            return e
+        }
+
+
     }
 }

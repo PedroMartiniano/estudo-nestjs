@@ -8,30 +8,29 @@ import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto copy";
 export class UserService {
     constructor(private prisma: PrismaService) { }
 
-    async create({ name, email, password, birthAt }: CreateUserDTO) {
+    async create({ name, email, password, birthAt, role }: CreateUserDTO) {
         try {
 
-            // const isEmailExist = await this.emailExists(email)
+            const isEmailExist = await this.emailExists(email)
 
-            // if (isEmailExist) {
-            //     throw new BadRequestException('Email already exists')
-            // }
-
-            console.log({ name, email, password, birthAt })
+            if (isEmailExist) {
+                throw new BadRequestException('Email already exists')
+            }
 
             const user = await this.prisma.user.create({
                 data: {
                     name,
                     email,
                     user_password: password,
-                    birthAt
+                    birthAt,
+                    role
                 }
             })
 
             return user
 
-        } catch {
-            return null
+        } catch (e) {
+            return e
         }
     }
 
@@ -50,7 +49,7 @@ export class UserService {
         return user
     }
 
-    async update(id: number, { name, email, password, birthAt }: UpdatePutUserDTO) {
+    async update(id: number, { name, email, password, birthAt, role }: UpdatePutUserDTO) {
 
         await this.userExists(id)
 
@@ -62,12 +61,13 @@ export class UserService {
                 name,
                 email,
                 user_password: password,
-                birthAt: birthAt ? birthAt : null
+                birthAt: birthAt ? birthAt : null,
+                role
             }
         })
     }
 
-    async updatePartial(id: number, { name, email, password, birthAt }: UpdatePatchUserDTO) {
+    async updatePartial(id: number, { name, email, password, birthAt, role }: UpdatePatchUserDTO) {
 
         await this.userExists(id)
 
@@ -79,7 +79,8 @@ export class UserService {
                 name,
                 email,
                 user_password: password,
-                birthAt
+                birthAt,
+                role
             }
         })
     }
