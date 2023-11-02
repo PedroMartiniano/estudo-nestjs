@@ -3,6 +3,7 @@ import { CreateUserDTO } from "./dto/create-user.dto";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto copy";
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UserService {
@@ -17,11 +18,15 @@ export class UserService {
                 throw new BadRequestException('Email already exists')
             }
 
+            const salt = await bcrypt.genSalt()
+
+            const hashPassword = await bcrypt.hash(password, salt)
+
             const user = await this.prisma.user.create({
                 data: {
                     name,
                     email,
-                    user_password: password,
+                    user_password: hashPassword,
                     birthAt,
                     role
                 }
@@ -53,6 +58,10 @@ export class UserService {
 
         await this.userExists(id)
 
+        const salt = await bcrypt.genSalt()
+
+        const hashPassword = await bcrypt.hash(password, salt)
+
         return this.prisma.user.update({
             where: {
                 id
@@ -60,7 +69,7 @@ export class UserService {
             data: {
                 name,
                 email,
-                user_password: password,
+                user_password: hashPassword,
                 birthAt: birthAt ? birthAt : null,
                 role
             }
@@ -70,6 +79,12 @@ export class UserService {
     async updatePartial(id: number, { name, email, password, birthAt, role }: UpdatePatchUserDTO) {
 
         await this.userExists(id)
+
+        if (password) {
+            const salt = await bcrypt.genSalt()
+
+            password = await bcrypt.hash(password, salt)
+        }
 
         return this.prisma.user.update({
             where: {

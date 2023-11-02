@@ -10,6 +10,7 @@ import { Roles } from "src/decorators/role.decorator";
 import { Role } from "src/enums/role.enum";
 import { RoleGuard } from "src/guards/role.guard";
 import { AuthGuard } from "src/guards/auth.guard";
+import { SkipThrottle, Throttle } from "@nestjs/throttler";
 
 // interceptor pode ser usado em um controller, um metodo, ou até globalmente
 // @UseInterceptors(LogInterceptor)
@@ -19,6 +20,8 @@ export class UserController {
 
     constructor(private readonly userService: UserService) { }
 
+    // para sobreescrever a configuração enviada no module geral do throttler apenas para essa requisição
+    @Throttle(20, 60)
     @Roles(Role.Admin)
     @Post()
     async create(@Body() data: CreateUserDTO, @Res() res: Response) {
@@ -31,6 +34,8 @@ export class UserController {
         return res.status(201).json(user)
     }
 
+    // para ignorar a requisição limite do throttler
+    @SkipThrottle()
     @Roles(Role.Admin)
     @Get()
     async read(@Res() res: Response) {
