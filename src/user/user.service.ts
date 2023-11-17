@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateUserDTO } from "./dto/create-user.dto";
+import { createUserDTO } from "./dto/create-user.dto";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto copy";
 import * as bcrypt from 'bcrypt'
@@ -14,7 +14,7 @@ export class UserService {
         private usersRepository: Repository<UserEntity>
     ) { }
 
-    async create({ name, email, password, birthAt, role }: CreateUserDTO) {
+    async create({ name, email, password, birthAt, role }: createUserDTO): Promise<UserEntity> {
         try {
 
             const isEmailExist = await this.emailExists(email)
@@ -75,7 +75,7 @@ export class UserService {
 
         const user = await this.readOne(id)
 
-        return user 
+        return user
     }
 
     async updatePartial(id: number, { name, email, password, birthAt, role }: UpdatePatchUserDTO) {
@@ -105,7 +105,14 @@ export class UserService {
 
         await this.userExists(id)
 
-        return this.usersRepository.delete(id)
+        try {
+            await this.usersRepository.delete(id)
+
+            return true
+        } catch {
+            return false
+        }
+
     }
 
     async userExists(id: number) {

@@ -1,16 +1,15 @@
 import { Body, Controller, Get, Param, Post, Put, Patch, Delete, ParseIntPipe, Res, UseInterceptors, BadRequestException, UseGuards } from "@nestjs/common";
-import { CreateUserDTO } from "./dto/create-user.dto";
+import { createUserDTO } from "./dto/create-user.dto";
 import { UpdatePutUserDTO } from "./dto/update-put-user.dto";
 import { UpdatePatchUserDTO } from "./dto/update-patch-user.dto copy";
 import { UserService } from "./user.service";
 import { Response } from "express";
-import { LogInterceptor } from "src/interceptors/log.interceptor";
-import { ParamId } from "src/decorators/param-id.decorator";
-import { Roles } from "src/decorators/role.decorator";
-import { Role } from "src/enums/role.enum";
-import { RoleGuard } from "src/guards/role.guard";
-import { AuthGuard } from "src/guards/auth.guard";
 import { SkipThrottle, Throttle } from "@nestjs/throttler";
+import { RoleGuard } from "../guards/role.guard";
+import { AuthGuard } from "../guards/auth.guard";
+import { Role } from "../enums/role.enum";
+import { Roles } from "../decorators/role.decorator";
+import { ParamId } from "../decorators/param-id.decorator";
 
 // interceptor pode ser usado em um controller, um metodo, ou até globalmente
 // @UseInterceptors(LogInterceptor)
@@ -24,36 +23,36 @@ export class UserController {
     @Throttle(20, 60)
     @Roles(Role.Admin)
     @Post()
-    async create(@Body() data: CreateUserDTO, @Res() res: Response) {
-        const user = await this.userService.create(data)
+    async create(@Body() data: createUserDTO) {
+        return this.userService.create(data)
 
-        if (user instanceof BadRequestException) {
-            return res.status(400).json(user.getResponse())
-        }
+        // if (user instanceof BadRequestException) {
+        //     return res.status(400).json(user.getResponse())
+        // }
 
-        return res.status(201).json(user)
+        // return res.status(201).json(user)
     }
 
     // para ignorar a requisição limite do throttler
     @SkipThrottle()
     @Roles(Role.Admin)
     @Get()
-    async read(@Res() res: Response) {
-        const user = await this.userService.readAll()
+    async read() {
+        return this.userService.readAll()
 
-        return res.status(200).json(user)
+        // return res.status(200).json(user)
     }
 
     @Get(':id')
     //ParamId decorator personalizado
-    async readOne(@ParamId() id: number, @Res() res: Response) {
-        const user = await this.userService.readOne(id)
+    async readOne(@ParamId() id: number) {
+        return this.userService.readOne(id)
 
-        if (!user) {
-            return res.status(400).json(user)
-        }
+        // if (!user) {
+        //     return res.status(400).json(user)
+        // }
 
-        return res.status(201).json(user)
+        // return res.status(201).json(user)
     }
 
     @Roles(Role.Admin)
@@ -73,6 +72,8 @@ export class UserController {
     @Delete(':id')
     //transformar o id em number sem o decorator personalizado
     async delete(@Param('id', ParseIntPipe) id: number) {
-        return this.userService.delete(id)
+        return {
+            success: await this.userService.delete(id)
+        }
     }
 }

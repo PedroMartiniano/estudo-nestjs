@@ -3,15 +3,15 @@ import { AuthLoginDTO } from "./dto/auth-login.dto";
 import { AuthRegisterDTO } from "./dto/auth-register.dto";
 import { AuthForgetDTO } from "./dto/auth-forget.dto";
 import { AuthResetDTO } from "./dto/auth-reset.dto";
-import { UserService } from "src/user/user.service";
 import { AuthService } from "./auth.service";
 import { Response } from "express";
 import { AuthMeDTO } from "./dto/auth-me.dto";
-import { AuthGuard } from "src/guards/auth.guard";
-import { User } from "src/decorators/user.decorator";
 import { FileInterceptor, FilesInterceptor, FileFieldsInterceptor } from "@nestjs/platform-express";
 import { join } from "path";
-import { FileService } from "src/file/file.service";
+import { AuthGuard } from "../guards/auth.guard";
+import { UserService } from "../user/user.service";
+import { FileService } from "../file/file.service";
+import { User } from "../decorators/user.decorator";
 
 @Controller('auth')
 export class AuthController {
@@ -67,9 +67,9 @@ export class AuthController {
 
         const [, imagefile] = photo.mimetype.split('/')
 
-        const path = join(__dirname, '../../storage/photos', `photo-${user.id}.${imagefile}`)
+        const filename = `photo-${user.id}.${imagefile}`
 
-        const result = await this.fileService.upload(photo, path)
+        const result = await this.fileService.upload(photo, filename)
 
         return { photo }
         return { success: result }

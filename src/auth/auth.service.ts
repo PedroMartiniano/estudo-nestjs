@@ -1,13 +1,12 @@
 import { BadGatewayException, BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt'
 import { AuthRegisterDTO } from "./dto/auth-register.dto";
-import { UserService } from "src/user/user.service";
 import * as bcrypt from 'bcrypt'
 import { MailerService } from "@nestjs-modules/mailer/dist";
-import { NOTFOUND } from "dns";
 import { InjectRepository } from "@nestjs/typeorm";
-import { UserEntity } from "src/user/entity/user.entity";
 import { Repository } from "typeorm";
+import { UserService } from "../user/user.service";
+import { UserEntity } from "../user/entity/user.entity";
 
 @Injectable()
 export class AuthService {
@@ -133,7 +132,7 @@ export class AuthService {
 
             const user = await this.userService.readOne(id)
 
-            return { token: this.createToken(user) }
+            return this.createToken(user)
         } catch (e) {
             throw new BadRequestException(e)
         }
@@ -142,6 +141,8 @@ export class AuthService {
 
     async register(data: AuthRegisterDTO) {
         try {
+            delete data.role
+
             const user = await this.userService.create(data)
 
             if (user instanceof BadRequestException) {

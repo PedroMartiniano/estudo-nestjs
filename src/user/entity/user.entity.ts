@@ -8,7 +8,7 @@ export class UserEntity {
     @PrimaryGeneratedColumn({
         unsigned: true
     })
-    id: number
+    id?: number
 
     @Column({
         length: 63
@@ -27,15 +27,16 @@ export class UserEntity {
     user_password: string
 
     @Column({
-        type: 'date'
+        type: 'date',
+        nullable: true
     })
-    birthAt: string
+    birthAt?: string
 
     @CreateDateColumn()
-    createdAt: string
+    createdAt?: Date
 
     @UpdateDateColumn()
-    updatedAt: string
+    updatedAt?: Date
 
     @Column({
         default: 1
