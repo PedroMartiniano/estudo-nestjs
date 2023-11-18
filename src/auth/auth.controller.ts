@@ -5,38 +5,30 @@ import { AuthForgetDTO } from "./dto/auth-forget.dto";
 import { AuthResetDTO } from "./dto/auth-reset.dto";
 import { AuthService } from "./auth.service";
 import { Response } from "express";
-import { AuthMeDTO } from "./dto/auth-me.dto";
 import { FileInterceptor, FilesInterceptor, FileFieldsInterceptor } from "@nestjs/platform-express";
-import { join } from "path";
 import { AuthGuard } from "../guards/auth.guard";
-import { UserService } from "../user/user.service";
 import { FileService } from "../file/file.service";
 import { User } from "../decorators/user.decorator";
+import { UserEntity } from "../user/entity/user.entity";
 
 @Controller('auth')
 export class AuthController {
     constructor(
-        private readonly userService: UserService,
         private readonly authService: AuthService,
         private readonly fileService: FileService
     ) { }
 
     @Post('login')
-    async login(@Body() { email, password }: AuthLoginDTO, @Res() res: Response) {
-        const token = await this.authService.login(email, password)
+    async login(@Body() { email, password }: AuthLoginDTO) {
+        const accessToken = await this.authService.login(email, password)
 
-        return res.status(201).json({ token })
+        return { accessToken }
     }
 
     @Post('register')
-    async register(@Body() body: AuthRegisterDTO, @Res() res: Response) {
-        const token = await this.authService.register(body)
-
-        if (token instanceof BadRequestException) {
-            return res.status(400).json(token.getResponse())
-        }
-
-        return res.status(201).json({ token })
+    async register(@Body() body: AuthRegisterDTO) {
+        const accessToken = await this.authService.register(body)
+        return { accessToken }
     }
 
     @Post('forget')
@@ -46,32 +38,33 @@ export class AuthController {
 
     @Post('reset')
     async reset(@Body() { password, token }: AuthResetDTO) {
-        return this.authService.reset(password, token)
+        const accessToken = await this.authService.reset(password, token)
+        return { accessToken }
     }
 
     @UseGuards(AuthGuard)
     @Get('me')
-    async me(@User() user) {
-        return { user }
+    async me(@User() user: UserEntity) {
+        return user
     }
 
     @UseInterceptors(FileInterceptor('file'))
     @UseGuards(AuthGuard)
     @Post('photo')
-    async uploadPhoto(@User() user, @UploadedFile(new ParseFilePipe({
+    async uploadPhoto(@User() user: UserEntity, @UploadedFile(new ParseFilePipe({
         validators: [
             new FileTypeValidator({ fileType: 'image/*' }),
-            new MaxFileSizeValidator({maxSize: 1024 * 100}) // max 100Kb
+            new MaxFileSizeValidator({ maxSize: 1024 * 100 }) // max 100Kb
         ]
     })) photo: Express.Multer.File) {
 
-        const [, imagefile] = photo.mimetype.split('/')
+        // const [, imagefile] = photo.mimetype.split('/')
 
-        const filename = `photo-${user.id}.${imagefile}`
+        const filename = `photo-${user.id}.jpeg`
 
         const result = await this.fileService.upload(photo, filename)
 
-        return { photo }
+        return photo
         return { success: result }
     }
 

@@ -17,7 +17,7 @@ export class FileService {
 
             await writeFile(path, photo.buffer)
 
-            return true
+            return path
         } catch {
             return false
 

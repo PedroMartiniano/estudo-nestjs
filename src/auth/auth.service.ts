@@ -19,7 +19,7 @@ export class AuthService {
     ) { }
 
     createToken(user: any) {
-        return this.JWTService.sign({
+        const accessToken = this.JWTService.sign({
             id: user.id,
             name: user.name,
             email: user.email
@@ -30,6 +30,8 @@ export class AuthService {
                 issuer: 'Login',
                 audience: 'Users'
             })
+
+        return accessToken
     }
 
     checkToken(token: string) {
