@@ -14,12 +14,12 @@ import { UserEntity } from './user/entity/user.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: process.env.ENV === 'test' ? '.env.test' : '.env'
+      envFilePath: process.env.ENV === 'test' ? '.env.test' : '.env',
     }),
     // throttler serve para verificar quantas requisições estão sendo feitas na api, podendo definir uma quantidade maxima dentro de um tempo limite, caso essa requisição maxima passar, ele bloqueará a requisição
     ThrottlerModule.forRoot({
       ttl: 60,
-      limit: 100
+      limit: 100,
     }),
     forwardRef(() => UserModule),
     forwardRef(() => AuthModule),
@@ -29,8 +29,8 @@ import { UserEntity } from './user/entity/user.entity';
         port: 587,
         auth: {
           user: 'mabelle.waelchi@ethereal.email',
-          pass: 'ppYurtYUwjEQz1GunX'
-        }
+          pass: 'ppYurtYUwjEQz1GunX',
+        },
       },
       defaults: {
         from: '"PEDRO PAULINO" <mabelle.waelchi@ethereal.email>',
@@ -41,7 +41,7 @@ import { UserEntity } from './user/entity/user.entity';
         options: {
           strict: true,
         },
-      }
+      },
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -51,14 +51,17 @@ import { UserEntity } from './user/entity/user.entity';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       entities: [UserEntity],
-      synchronize: (process.env.ENV === 'dev')
-    })
+      synchronize: process.env.ENV === 'dev',
+    }),
   ],
   controllers: [AppController],
   // para passar o guard do throttler no provider é necessário realizar essa configuração do objeto
-  providers: [AppService, {
-    provide: APP_GUARD,
-    useClass: ThrottlerGuard
-  }],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}
