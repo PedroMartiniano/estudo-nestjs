@@ -13,7 +13,9 @@ import { UserEntity } from './user/entity/user.entity';
 // decorator responsavel por passar os argumentos/parametros para a classe AppModule
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      envFilePath: process.env.ENV === 'test' ? '.env.test' : '.env'
+    }),
     // throttler serve para verificar quantas requisições estão sendo feitas na api, podendo definir uma quantidade maxima dentro de um tempo limite, caso essa requisição maxima passar, ele bloqueará a requisição
     ThrottlerModule.forRoot({
       ttl: 60,

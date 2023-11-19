@@ -22,7 +22,7 @@ export class Migrate1699210632176 implements MigrationInterface {
                 length: '127',
                 isUnique: true
             }, {
-                name: 'password',
+                name: 'user_password',
                 type: 'varchar',
                 length: '127',
             }, {
